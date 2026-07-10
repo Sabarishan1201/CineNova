@@ -1,0 +1,58 @@
+/* ===========================
+   Google Font
+=========================== */
+
+body{
+    margin:0;
+    padding:0;
+    font-family:'Poppins',sans-serif;
+    background:#0f0f0f;
+    color:white;
+}
+
+/* Remove underline */
+
+a{
+    text-decoration:none;
+}
+
+/* Smooth Scroll */
+
+html{
+    scroll-behavior:smooth;
+}
+
+/* Section Padding */
+
+section{
+
+    padding:80px 0;
+
+}
+
+/* Custom Container */
+
+.container-custom{
+
+    width:90%;
+    margin:auto;
+
+}
+
+/* Buttons */
+
+.btn-main{
+
+    background:#E50914;
+    color:white;
+    border:none;
+    padding:12px 28px;
+    border-radius:8px;
+    transition:.3s;
+
+}
+
+.btn-main:hover{
+
+    background:#b20710;
+}
