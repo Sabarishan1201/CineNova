@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}
+Admin Dashboard
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2>🎬 CineNova Admin</h2>
+
+        <a href="{{ url_for('add_movie') }}"
+           class="btn btn-danger">
+
+            ➕ Add Movie
+
+        </a>
+
+    </div>
+
+    <table class="table table-dark table-hover">
+
+        <thead>
+
+            <tr>
+
+                <th>ID</th>
+                <th>Poster</th>
+                <th>Title</th>
+                <th>Genre</th>
+                <th>Rating</th>
+                <th>Actions</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for movie in movies %}
+
+            <tr>
+
+                <td>{{ movie.id }}</td>
+
+                <td>
+
+                    {% if movie.poster %}
+
+                    <img
+                        src="{{ url_for('static', filename='images/movies/' + movie.poster) }}"
+                        width="60">
+
+                    {% endif %}
+
+                </td>
+
+                <td>{{ movie.title }}</td>
+
+                <td>{{ movie.genre }}</td>
+
+                <td>⭐ {{ movie.rating }}</td>
+
+                <td>
+
+                    <a
+    href="{{ url_for('edit_movie', movie_id=movie.id) }}"
+    class="btn btn-warning btn-sm">
+
+    ✏ Edit
+
+</a>
+
+                    <a
+    href="{{ url_for('delete_movie', movie_id=movie.id) }}"
+    class="btn btn-danger btn-sm"
+    onclick="return confirm('Delete this movie?')">
+
+    🗑 Delete
+
+</a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

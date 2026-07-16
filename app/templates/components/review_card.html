@@ -1,0 +1,35 @@
+<div class="review-card">
+
+    <div class="review-header">
+
+        <div class="avatar">
+            👤
+        </div>
+
+        <div>
+
+            <h4>{{ review.user }}</h4>
+
+            <span class="movie-name">
+                {{ review.movie }}
+            </span>
+
+        </div>
+
+    </div>
+
+    <div class="stars">
+
+        {% for i in range(review.rating) %}
+            ⭐
+        {% endfor %}
+
+    </div>
+
+    <p class="review-text">
+
+        "{{ review.review }}"
+
+    </p>
+
+</div>

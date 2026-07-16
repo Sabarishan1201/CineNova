@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ movie.title }}
+{% endblock %}
+
+{% block content %}
+
+<section class="movie-details">
+
+<div class="container">
+
+<div class="row">
+
+<div class="col-lg-4">
+
+{% if movie.poster %}
+
+<img
+src="{{ url_for('static', filename='images/movies/' + movie.poster) }}"
+class="img-fluid rounded shadow">
+
+{% else %}
+
+<div class="poster-placeholder">
+
+🎬
+
+</div>
+
+{% endif %}
+
+</div>
+
+<div class="col-lg-8">
+
+<h1>{{ movie.title }}</h1>
+
+<h4 class="text-danger">
+
+⭐ {{ movie.rating }}
+
+</h4>
+
+<p>
+
+<strong>Genre:</strong>
+
+{{ movie.genre }}
+
+</p>
+
+<p>
+
+<strong>Year:</strong>
+
+{{ movie.year }}
+
+</p>
+
+<hr>
+
+<h3>Story</h3>
+
+<p>
+
+{{ movie.description }}
+
+</p>
+
+<div class="mt-4">
+
+<a
+    href="{{ url_for('add_to_watchlist', movie_id=movie.id) }}"
+    class="btn btn-danger">
+
+    ❤️ Add to Watchlist
+
+</a>
+
+{% if movie.trailer %}
+
+<div class="mt-5">
+
+    <h3 class="mb-4">
+        🎥 Official Trailer
+    </h3>
+
+    <div class="ratio ratio-16x9">
+
+        <iframe
+            src="https://www.youtube.com/embed/{{ movie.trailer }}"
+            title="Movie Trailer"
+            allowfullscreen>
+        </iframe>
+
+    </div>
+
+</div>
+
+{% else %}
+
+<div class="alert alert-secondary mt-4">
+
+    Trailer not available.
+
+</div>
+
+{% endif %}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+{% endblock %}

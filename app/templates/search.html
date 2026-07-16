@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}
+Search
+{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+
+    <h2 class="mb-4">
+
+        Search Results for "{{ query }}"
+
+    </h2>
+
+    <div class="movie-grid">
+
+        {% if movies %}
+
+            {% for movie in movies %}
+
+                {% include "components/movie_card.html" %}
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="text-center">
+
+                <h3>No movies found.</h3>
+
+                <p>Try searching for another movie.</p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}

@@ -2,76 +2,107 @@
 
     <div class="container">
 
-        <a class="navbar-brand fw-bold fs-3" href="/">
-
-            🎬 CineNova
-
+        <a class="navbar-brand fw-bold fs-3" href="{{ url_for('home') }}">
+            <span class="logo-red">Cine</span><span class="logo-white">Nova</span>
         </a>
 
         <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav">
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav">
 
-        <span class="navbar-toggler-icon"></span>
+            <span class="navbar-toggler-icon"></span>
 
         </button>
 
-        <div class="collapse navbar-collapse"
-             id="navbarNav">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <form
+    class="d-flex me-3"
+    action="{{ url_for('search') }}"
+    method="GET">
 
-            <ul class="navbar-nav ms-auto">
+    <input
+        class="form-control me-2"
+        type="search"
+        name="q"
+        placeholder="Search movies..."
+        aria-label="Search">
+
+    <button
+        class="btn btn-danger"
+        type="submit">
+
+        🔍
+
+    </button>
+
+</form>
+
+            <ul class="navbar-nav ms-auto align-items-center">
 
                 <li class="nav-item">
-
-                    <a class="nav-link" href="/">
-
+                    <a class="nav-link" href="{{ url_for('home') }}">
                         Home
-
                     </a>
-
                 </li>
 
                 <li class="nav-item">
-
                     <a class="nav-link" href="#">
-
                         Movies
-
                     </a>
-
                 </li>
 
                 <li class="nav-item">
-
                     <a class="nav-link" href="#">
-
                         Web Series
-
                     </a>
-
                 </li>
 
                 <li class="nav-item">
-
                     <a class="nav-link" href="#">
-
                         Reviews
-
                     </a>
-
                 </li>
 
-                <li class="nav-item">
+                {% if session.get('user_id') %}
 
-                    <a class="nav-link" href="#">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('watchlist') }}">
+                            ❤️ Watchlist
+                        </a>
+                    </li>
 
-                        Login
+                    <li class="nav-item">
+                        <span class="nav-link">
+                            👋 {{ session['username'] }}
+                        </span>
+                    </li>
 
-                    </a>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger"
+                           href="{{ url_for('logout') }}">
+                            Logout
+                        </a>
+                    </li>
 
-                </li>
+                {% else %}
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           href="{{ url_for('login') }}">
+                            Login
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="btn btn-danger ms-2"
+                           href="{{ url_for('register') }}">
+                            Register
+                        </a>
+                    </li>
+
+                {% endif %}
 
             </ul>
 
