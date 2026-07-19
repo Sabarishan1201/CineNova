@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="card shadow p-4">
+
+        <h2>👤 {{ user.username }}</h2>
+
+        <hr>
+
+        <p><strong>Email:</strong> {{ user.email }}</p>
+
+        <p>
+            <strong>Reviews Written:</strong>
+            {{ review_count }}
+        </p>
+
+        <p>
+            <strong>Watchlist Movies:</strong>
+            {{ watchlist_count }}
+        </p>
+
+        <p>
+            <strong>Favorite Genre:</strong>
+
+            {% if favorite_genre %}
+                {{ favorite_genre.genre }}
+            {% else %}
+                Not enough reviews yet
+            {% endif %}
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

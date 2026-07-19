@@ -32,13 +32,10 @@
 
     {% include 'components/navbar.html' %}
 
-    <main>
-
-        {% block content %}
-
-        {% endblock %}
-
+    <main class="page-content">
+        {% block content %}{% endblock %}
     </main>
+
 
     {% include 'components/footer.html' %}
 
@@ -47,6 +44,9 @@
 
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+
 
 </body>
 

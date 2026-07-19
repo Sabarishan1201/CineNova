@@ -6,115 +6,292 @@
 
 {% block content %}
 
-<section class="movie-details">
+<section class="movie-details py-5">
 
 <div class="container">
 
 <div class="row">
 
-<div class="col-lg-4">
+    <!-- Movie Poster -->
+    <div class="col-lg-4">
 
-{% if movie.poster %}
+        {% if movie.poster %}
 
-<img
-src="{{ url_for('static', filename='images/movies/' + movie.poster) }}"
-class="img-fluid rounded shadow">
+        <img
+            src="{{ url_for('static', filename='images/movies/' + movie.poster) }}"
+            class="img-fluid rounded shadow">
 
-{% else %}
+        {% else %}
 
-<div class="poster-placeholder">
+        <div class="poster-placeholder text-center p-5 bg-dark rounded">
 
-🎬
+            <h1>🎬</h1>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <!-- Movie Details -->
+    <div class="col-lg-8">
+
+        <h1>{{ movie.title }}</h1>
+
+        <h4 class="text-danger">
+
+            ⭐ {{ "%.1f"|format(avg_rating or movie.rating) }}
+
+        </h4>
+
+        <p>
+
+            <strong>Genre:</strong>
+            {{ movie.genre }}
+
+        </p>
+
+        <p>
+
+            <strong>Year:</strong>
+            {{ movie.year }}
+
+        </p>
+
+        <hr>
+
+        <h3>Story</h3>
+
+        <p>
+
+            {{ movie.description }}
+
+        </p>
+
+        <a
+            href="{{ url_for('add_to_watchlist', movie_id=movie.id) }}"
+            class="btn btn-danger">
+
+            ❤️ Add to Watchlist
+
+        </a>
+
+        <!-- Trailer -->
+
+        {% if movie.trailer %}
+
+        <div class="mt-5">
+
+            <h3 class="mb-4">
+
+                🎥 Official Trailer
+
+            </h3>
+
+            <div class="ratio ratio-16x9">
+
+                <iframe
+                    src="https://www.youtube.com/embed/{{ movie.trailer }}"
+                    title="Movie Trailer"
+                    allowfullscreen>
+                </iframe>
+
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <div class="alert alert-secondary mt-5">
+
+            Trailer not available.
+
+        </div>
+
+        {% endif %}
+
+        <!-- Review Form -->
+
+        <hr class="my-5">
+
+        <h3>⭐ Write a Review</h3>
+
+        {% if session.get("user_id") %}
+
+        <form
+            action="{{ url_for('add_review', movie_id=movie.id) }}"
+            method="POST">
+
+            <input
+                type="hidden"
+                name="title"
+                value="{{ movie.title }}">
+
+            <div class="mb-3">
+
+                <label class="form-label">
+
+                    Rating
+
+                </label>
+
+                <div class="star-rating">
+
+    <input type="hidden" name="rating" id="rating" value="5">
+
+    <span class="star" data-value="1">★</span>
+    <span class="star" data-value="2">★</span>
+    <span class="star" data-value="3">★</span>
+    <span class="star" data-value="4">★</span>
+    <span class="star" data-value="5">★</span>
+
+</div>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+
+                    Review
+
+                </label>
+
+                <textarea
+                    name="review"
+                    class="form-control"
+                    rows="4"
+                    placeholder="Write your review..."
+                    required></textarea>
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-success">
+
+                Submit Review
+
+            </button>
+
+        </form>
+
+        {% else %}
+
+        <div class="alert alert-warning mt-3">
+
+            Please login to write a review.
+
+        </div>
+
+        {% endif %}
+
+        <!-- Reviews -->
+
+        <hr class="my-5">
+
+        <h3>User Reviews</h3>
+
+        {% if reviews %}
+
+            {% for review in reviews %}
+            {% if session.get("user_id") == review.user_id %}
+
+<div class="review-actions">
+
+    <a href="{{ url_for('edit_review', review_id=review.id) }}"
+       class="btn btn-warning btn-sm">
+
+       ✏ Edit
+
+    </a>
+
+    <a href="{{ url_for('delete_review', review_id=review.id) }}"
+       class="btn btn-danger btn-sm"
+       onclick="return confirm('Delete this review?')">
+
+       🗑 Delete
+
+    </a>
 
 </div>
 
 {% endif %}
 
-</div>
+            <div class="card bg-dark text-light mb-3">
 
-<div class="col-lg-8">
+                <div class="card-body">
 
-<h1>{{ movie.title }}</h1>
+                    <h5>
 
-<h4 class="text-danger">
+                        {{ review.username }}
 
-⭐ {{ movie.rating }}
+                    </h5>
 
-</h4>
+                    <p>
 
-<p>
+                        ⭐ {{ review.rating }}/5
 
-<strong>Genre:</strong>
+                    </p>
 
-{{ movie.genre }}
+                    <p>
 
-</p>
+                        {{ review.review }}
 
-<p>
+                    </p>
 
-<strong>Year:</strong>
+                    <small class="text-secondary">
 
-{{ movie.year }}
+                        {{ review.date }}
 
-</p>
+                    </small>
 
-<hr>
+                </div>
 
-<h3>Story</h3>
+            </div>
 
-<p>
+            {% endfor %}
 
-{{ movie.description }}
+        {% else %}
 
-</p>
+        <div class="alert alert-info">
 
-<div class="mt-4">
+            No reviews yet. Be the first to review this movie!
 
-<a
-    href="{{ url_for('add_to_watchlist', movie_id=movie.id) }}"
-    class="btn btn-danger">
+        </div>
 
-    ❤️ Add to Watchlist
-
-</a>
-
-{% if movie.trailer %}
-
-<div class="mt-5">
-
-    <h3 class="mb-4">
-        🎥 Official Trailer
-    </h3>
-
-    <div class="ratio ratio-16x9">
-
-        <iframe
-            src="https://www.youtube.com/embed/{{ movie.trailer }}"
-            title="Movie Trailer"
-            allowfullscreen>
-        </iframe>
+        {% endif %}
 
     </div>
 
 </div>
 
-{% else %}
-
-<div class="alert alert-secondary mt-4">
-
-    Trailer not available.
-
 </div>
 
-{% endif %}
+</section>
+<hr class="my-5">
 
-</div>
+<section class="recommended-section">
 
-</div>
+    <h2 class="mb-4">🎯 You May Also Like</h2>
 
-</div>
+    <div class="movie-grid">
 
-</div>
+        {% if recommended %}
+
+            {% for movie in recommended %}
+
+                {% include "components/movie_card.html" %}
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No similar movies found.</p>
+
+        {% endif %}
+
+    </div>
 
 </section>
 

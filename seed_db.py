@@ -1,52 +1,34 @@
-import sqlite3
+from app.database import get_connection
 
-conn = sqlite3.connect("database.db")
-cursor = conn.cursor()
+conn = get_connection()
 
 movies = [
-
     (
         "Interstellar",
         "Sci-Fi",
         2014,
-        8.9,
+        8.7,
         "2h 49m",
         "English",
         "interstellar.jpg",
-        "interstellar-bg.jpg",
-        "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
-        "https://www.youtube.com/watch?v=zSWdZVtXT7E",
+        "",
+        "A team travels through a wormhole in search of humanity's future.",
+        "https://www.youtube.com/embed/zSWdZVtXT7E",
         "Christopher Nolan"
     ),
-
     (
         "Oppenheimer",
-        "Drama",
+        "Biography",
         2023,
-        8.6,
+        8.5,
         "3h",
         "English",
         "oppenheimer.jpg",
-        "oppenheimer-bg.jpg",
-        "The story of physicist J. Robert Oppenheimer and the creation of the atomic bomb.",
-        "https://www.youtube.com/watch?v=uYPbbksJxIg",
+        "",
+        "The story of J. Robert Oppenheimer and the atomic bomb.",
+        "https://www.youtube.com/embed/uYPbbksJxIg",
         "Christopher Nolan"
     ),
-
-    (
-        "The Dark Knight",
-        "Action",
-        2008,
-        9.0,
-        "2h 32m",
-        "English",
-        "dark-knight.jpg",
-        "dark-knight-bg.jpg",
-        "Batman faces the Joker, who plunges Gotham City into chaos.",
-        "https://www.youtube.com/watch?v=EXeTwQWrcwY",
-        "Christopher Nolan"
-    ),
-
     (
         "Inception",
         "Sci-Fi",
@@ -55,35 +37,34 @@ movies = [
         "2h 28m",
         "English",
         "inception.jpg",
-        "inception-bg.jpg",
-        "A thief steals secrets through dream-sharing technology.",
-        "https://www.youtube.com/watch?v=YoHD9XEInc0",
+        "",
+        "A thief enters dreams to steal secrets.",
+        "https://www.youtube.com/embed/YoHD9XEInc0",
+        "Christopher Nolan"
+    ),
+    (
+        "The Dark Knight",
+        "Action",
+        2008,
+        9.0,
+        "2h 32m",
+        "English",
+        "dark-knight.jpg",
+        "",
+        "Batman faces the Joker.",
+        "https://www.youtube.com/embed/EXeTwQWrcwY",
         "Christopher Nolan"
     )
-
 ]
 
-cursor.executemany("""
-INSERT INTO movies(
-title,
-genre,
-year,
-rating,
-runtime,
-language,
-poster,
-backdrop,
-description,
-trailer,
-director
-)
-
-VALUES(?,?,?,?,?,?,?,?,?,?,?)
-
-""", movies)
+for movie in movies:
+    conn.execute("""
+        INSERT INTO movies
+        (title, genre, year, rating, runtime, language, poster, backdrop, description, trailer, director)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?)
+    """, movie)
 
 conn.commit()
-
 conn.close()
 
-print("✅ Movies Added Successfully")
+print("Movies added successfully!")

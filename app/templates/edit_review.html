@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Review{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <h2>Edit Review</h2>
+
+    <form method="POST">
+
+        <input type="hidden" name="title" value="{{ request.args.get('title', '') }}">
+
+        <div class="mb-3">
+            <label>Rating</label>
+
+            <input
+                type="number"
+                min="1"
+                max="5"
+                class="form-control"
+                name="rating"
+                value="{{ review.rating }}"
+                required>
+        </div>
+
+        <div class="mb-3">
+
+            <label>Review</label>
+
+            <textarea
+                class="form-control"
+                name="review"
+                rows="5"
+                required>{{ review.review }}</textarea>
+
+        </div>
+
+        <button class="btn btn-success">
+
+            Update Review
+
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

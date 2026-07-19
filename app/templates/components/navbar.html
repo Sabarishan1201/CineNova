@@ -1,5 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-black shadow-sm">
-
+<nav id="mainNavbar" class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container">
 
         <a class="navbar-brand fw-bold fs-3" href="{{ url_for('home') }}">
@@ -72,6 +71,11 @@
                             ❤️ Watchlist
                         </a>
                     </li>
+                    <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('profile') }}">
+        👤 Profile
+    </a>
+</li>
 
                     <li class="nav-item">
                         <span class="nav-link">

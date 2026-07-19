@@ -8,75 +8,57 @@ Home | CineNova
 
 <section class="hero">
 
-    <div class="hero-overlay">
+    <div class="hero-overlay"></div>
 
-        <div class="container">
+    <div class="hero-content">
 
-            <div class="row align-items-center">
+        <div class="hero-text">
 
-                <div class="col-lg-7">
+            <span class="featured-tag">🔥 Featured Movie</span>
 
-                    <h1 class="hero-title">
-                        Unlimited Movies,
-                        <br>
-                        Web Series & Reviews
-                    </h1>
+            <h1>{{ featured_movie.title }}</h1>
 
-                    <p class="hero-subtitle mt-4">
-                        Discover trending movies, explore web series,
-                        read reviews, rate your favorites and build your
-                        personal watchlist.
-                    </p>
+            <div class="hero-info">
+                <span>⭐ {{ featured_movie.rating }}</span>
+                <span>{{ featured_movie.genre }}</span>
+                <span>{{ featured_movie.year }}</span>
+            </div>
 
-                    <div class="mt-5">
+            <p>
+                {{ featured_movie.description }}
+            </p>
 
-                        <a href="#" class="btn btn-danger btn-lg px-5 py-3 me-3">
-                             Explore Movies
-                         </a>
+            <div class="hero-buttons">
 
-                        <a href="#" class="btn btn-outline-light btn-lg px-5 py-3">
-                            Trending
-                        </a>
+                <a href="{{ featured_movie.trailer }}"
+                   target="_blank"
+                   class="btn-primary">
+                    ▶ Watch Trailer
+                </a>
 
-                    </div>
-
-                    <div class="stats mt-5">
-
-                        <div class="stat-box">
-                            <h3>15K+</h3>
-                            <p>Movies</p>
-                        </div>
-
-                        <div class="stat-box">
-                            <h3>500+</h3>
-                            <p>Web Series</p>
-                        </div>
-
-                        <div class="stat-box">
-                            <h3>50K+</h3>
-                            <p>Users</p>
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="col-lg-5 text-center">
-
-                  <div class="hero-placeholder">
-
-                     🎬
-
-                </div>
+                <a href="{{ url_for('movie_details',
+                    title=featured_movie.title) }}"
+                    class="btn-secondary">
+                    More Details
+                </a>
 
             </div>
+
+        </div>
+
+        <div class="hero-image">
+
+            <img
+            src="{{ url_for('static',
+            filename='images/movies/' + featured_movie.poster) }}"
+            alt="{{ featured_movie.title }}">
 
         </div>
 
     </div>
 
 </section>
-<section class="trending-section">
+<section id="trending" class="trending-section">
 
     <div class="container">
 

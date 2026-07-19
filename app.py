@@ -4,6 +4,8 @@ from app.database import get_connection
 import os
 import uuid
 from werkzeug.utils import secure_filename
+from datetime import datetime
+from flask import session, redirect, url_for, request, flash
 
 app = Flask(
     __name__,
@@ -43,7 +45,24 @@ def save_image(file):
 # =====================================================
 # Trending Movies
 # =====================================================
+@app.route("/trending")
+def trending():
 
+    conn = get_connection()
+
+    movies = conn.execute("""
+        SELECT *
+        FROM movies
+        ORDER BY rating DESC
+        LIMIT 10
+    """).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "trending.html",
+        movies=movies
+    )
 
 
 # =====================================================
@@ -72,7 +91,7 @@ top_movies = [
         "rating": "9.3",
         "genre": "Drama",
         "year": "1994",
-        "poster": None,
+        "poster": "shawshank.jpg",
         "description": "Two imprisoned men bond over decades while finding hope and redemption."
     },
 
@@ -81,7 +100,7 @@ top_movies = [
         "rating": "9.2",
         "genre": "Crime",
         "year": "1972",
-        "poster": None,
+        "poster": "godfather.jpg",
         "description": "The aging patriarch of an organized crime dynasty transfers control to his son."
     },
 
@@ -99,7 +118,7 @@ top_movies = [
         "rating": "9.0",
         "genre": "Drama",
         "year": "1957",
-        "poster": None,
+        "poster": "12angrymen.jpg",
         "description": "A jury debates the guilt of a young defendant in a murder trial."
     }
 
@@ -116,7 +135,7 @@ web_series = [
         "rating": "8.7",
         "genre": "Sci-Fi",
         "year": "2016",
-        "poster": None,
+        "poster": "stranger_things.jpg",
         "description": "A group of friends uncover supernatural mysteries in their town."
     },
 
@@ -125,7 +144,7 @@ web_series = [
         "rating": "9.5",
         "genre": "Crime",
         "year": "2008",
-        "poster": None,
+        "poster": "breaking_bad.jpg",
         "description": "A chemistry teacher turns to manufacturing drugs after a terminal diagnosis."
     },
 
@@ -134,7 +153,7 @@ web_series = [
         "rating": "8.8",
         "genre": "Mystery",
         "year": "2017",
-        "poster": None,
+        "poster": "dark.jpg",
         "description": "Families discover a mysterious time travel conspiracy."
     },
 
@@ -143,7 +162,7 @@ web_series = [
         "rating": "8.2",
         "genre": "Thriller",
         "year": "2017",
-        "poster": None,
+        "poster": "money_heist.jpg",
         "description": "A criminal mastermind plans the biggest heist in history."
     }
 
@@ -186,10 +205,23 @@ reviews = [
 def home():
 
     conn = get_connection()
+    featured_movie = conn.execute(
+        "SELECT * FROM movies ORDER BY rating DESC LIMIT 1"
+    ).fetchone()
 
     movies = conn.execute(
         "SELECT * FROM movies"
     ).fetchall()
+
+    movie_count = conn.execute(
+       "SELECT COUNT(*) FROM movies"
+    ).fetchone()[0]
+
+    series_count = len(web_series)
+
+    user_count = conn.execute(
+        "SELECT COUNT(*) FROM users"
+    ).fetchone()[0]
 
     conn.close()
 
@@ -199,7 +231,11 @@ def home():
         genres=genres,
         top_movies=top_movies,
         web_series=web_series,
-        reviews=reviews
+        reviews=reviews,
+        featured_movie=featured_movie,
+        movie_count=movie_count,
+        series_count=series_count,
+        user_count=user_count
     )
 # =====================================================
 # Movie Details
@@ -211,19 +247,53 @@ def movie_details(title):
     conn = get_connection()
 
     movie = conn.execute(
-        "SELECT * FROM movies WHERE title = ?",
+        "SELECT * FROM movies WHERE title=?",
         (title,)
     ).fetchone()
 
-    conn.close()
-
     if movie is None:
+        conn.close()
         return "Movie Not Found", 404
 
+    reviews = conn.execute(
+        """
+        SELECT *
+        FROM reviews
+        WHERE movie_id=?
+        ORDER BY id DESC
+        """,
+        (movie["id"],)
+    ).fetchall()
+
+    avg = conn.execute(
+        """
+        SELECT AVG(rating)
+        FROM reviews
+        WHERE movie_id=?
+        """,
+        (movie["id"],)
+    ).fetchone()[0]
+
+    recommended = conn.execute("""
+    SELECT *
+    FROM movies
+    WHERE genre = ?
+      AND id != ?
+    LIMIT 4
+""", (
+    movie["genre"],
+    movie["id"]
+)).fetchall()
+
+    conn.close()
+
     return render_template(
-        "movie-details.html",
-        movie=movie
-    )
+    "movie-details.html",
+    movie=movie,
+    reviews=reviews,
+    avg_rating=avg,
+    recommended=recommended
+)
     # ==========================================
 # Register
 # ==========================================
@@ -429,15 +499,43 @@ def admin():
 
     conn = get_connection()
 
+    total_movies = conn.execute(
+       "SELECT COUNT(*) FROM movies"
+    ).fetchone()[0]
+
+    total_users = conn.execute(
+       "SELECT COUNT(*) FROM users"
+    ).fetchone()[0]
+
+    total_reviews = conn.execute(
+       "SELECT COUNT(*) FROM reviews"
+    ).fetchone()[0]
+
+    total_watchlist = conn.execute(
+       "SELECT COUNT(*) FROM watchlist"
+    ).fetchone()[0]
+
     movies = conn.execute(
-        "SELECT * FROM movies ORDER BY id DESC"
+       "SELECT * FROM movies ORDER BY id DESC"
     ).fetchall()
+
+    latest_users = conn.execute("""
+    SELECT username, email
+    FROM users
+    ORDER BY id DESC
+    LIMIT 5
+""").fetchall()
 
     conn.close()
 
     return render_template(
-        "admin.html",
-        movies=movies
+       "admin.html",
+       movies=movies,
+       total_movies=total_movies,
+       total_users=total_users,
+       total_reviews=total_reviews,
+       total_watchlist=total_watchlist,
+         latest_users=latest_users
     )
 
 # ==========================================
@@ -595,6 +693,180 @@ def delete_movie(movie_id):
     conn.close()
 
     return redirect(url_for("admin"))
+@app.route("/movie/<int:movie_id>/review", methods=["POST"])
+def add_review(movie_id):
+
+    if "user_id" not in session:
+        flash("Please login to write a review.", "warning")
+        return redirect(request.referrer)
+
+    rating = int(request.form["rating"])
+    review = request.form["review"]
+
+    conn = get_connection()
+
+    existing = conn.execute(
+        """
+        SELECT * FROM reviews
+        WHERE movie_id=? AND user_id=?
+        """,
+        (movie_id, session["user_id"])
+    ).fetchone()
+
+    if existing:
+        flash("You have already reviewed this movie.", "warning")
+        conn.close()
+        return redirect(request.referrer)
+
+    conn.execute(
+        """
+        INSERT INTO reviews
+        (movie_id,user_id,username,rating,review,date)
+        VALUES(?,?,?,?,?,?)
+        """,
+        (
+            movie_id,
+            session["user_id"],
+            session["username"],
+            rating,
+            review,
+            datetime.now().strftime("%d-%m-%Y")
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+    flash("Review added successfully!", "success")
+
+    return redirect(url_for("movie_details", title=request.form["title"]))
+
+@app.route("/review/delete/<int:review_id>")
+def delete_review(review_id):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    conn = get_connection()
+
+    review = conn.execute(
+        "SELECT * FROM reviews WHERE id=?",
+        (review_id,)
+    ).fetchone()
+
+    if review is None:
+        conn.close()
+        return "Review Not Found", 404
+
+    if review["user_id"] != session["user_id"]:
+        conn.close()
+        return "Access Denied", 403
+
+    conn.execute(
+        "DELETE FROM reviews WHERE id=?",
+        (review_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    flash("Review deleted successfully!", "success")
+
+    return redirect(request.referrer)
+
+@app.route("/review/edit/<int:review_id>", methods=["GET", "POST"])
+def edit_review(review_id):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    conn = get_connection()
+
+    review = conn.execute(
+        "SELECT * FROM reviews WHERE id=?",
+        (review_id,)
+    ).fetchone()
+
+    if review is None:
+        conn.close()
+        return "Review Not Found", 404
+
+    if review["user_id"] != session["user_id"]:
+        conn.close()
+        return "Access Denied", 403
+
+    if request.method == "POST":
+
+       conn.execute("""
+            UPDATE reviews
+            SET rating=?, review=?
+            WHERE id=?
+        """, (
+            request.form["rating"],
+            request.form["review"],
+            review_id
+        ))
+
+       conn.commit()
+
+       movie = conn.execute(
+           "SELECT title FROM movies WHERE id=?",
+           (review["movie_id"],)
+        ).fetchone()
+
+       conn.close()
+
+       return redirect(url_for("movie_details", title=movie["title"]))
+
+    return render_template(
+        "edit_review.html",
+        review=review
+    )
+
+@app.route("/profile")
+def profile():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    conn = get_connection()
+
+    user = conn.execute(
+        "SELECT * FROM users WHERE id=?",
+        (session["user_id"],)
+    ).fetchone()
+
+    review_count = conn.execute(
+        "SELECT COUNT(*) FROM reviews WHERE user_id=?",
+        (session["user_id"],)
+    ).fetchone()[0]
+
+    watchlist_count = conn.execute(
+        "SELECT COUNT(*) FROM watchlist WHERE user_id=?",
+        (session["user_id"],)
+    ).fetchone()[0]
+
+    favorite_genre = conn.execute("""
+        SELECT movies.genre, COUNT(*) AS total
+        FROM reviews
+        JOIN movies
+        ON reviews.movie_id = movies.id
+        WHERE reviews.user_id=?
+        GROUP BY movies.genre
+        ORDER BY total DESC
+        LIMIT 1
+    """, (session["user_id"],)).fetchone()
+
+    conn.close()
+
+    return render_template(
+        "profile.html",
+        user=user,
+        review_count=review_count,
+        watchlist_count=watchlist_count,
+        favorite_genre=favorite_genre
+    )
+
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
